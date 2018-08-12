@@ -5,11 +5,12 @@ import sessionConfig from "./configs/session";
 import logger from "morgan";
 import * as bodyParser from "body-parser";
 import api from "./api";
+import * as socketIO from "socket.io";
 
 const timezone = "UTC";
 process.env.TZ = timezone;
 
-var app = express();
+const app = express();
 
 app.use(logger("dev"));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -19,6 +20,11 @@ app.use(cors());
 
 app.use("/api", api);
 
-app.listen(8080, function() {
+const server = app.listen(8080, () => {
   console.log("Example app listening on port 8080!");
+});
+
+const io = socketIO.listen(server);
+io.on("connection", (socket: any) => {
+  console.log("a user connected");
 });

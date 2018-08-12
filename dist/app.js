@@ -19,14 +19,14 @@ const bodyParser = __importStar(require("body-parser"));
 const api_1 = __importDefault(require("./api"));
 const timezone = "UTC";
 process.env.TZ = timezone;
-var app = express_1.default();
+const app = express_1.default();
 app.use(morgan_1.default("dev"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express_session_1.default(session_1.default));
 app.use(cors_1.default());
 app.use("/api", api_1.default);
-app.listen(8080, function () {
+app.listen(8080, () => {
     console.log("Example app listening on port 8080!");
 });
 //# sourceMappingURL=app.js.map

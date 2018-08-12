@@ -12,10 +12,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const http_1 = require("http");
+const socket_io_1 = __importDefault(require("socket.io"));
 const router = express_1.default.Router();
+const server = http_1.createServer();
+const io = socket_io_1.default(server);
+io.on("connection", (socket) => {
+    console.log(socket);
+    console.log("a user connected");
+});
 router.get("/", (req, res) => __awaiter(this, void 0, void 0, function* () {
     res.send({
-        message: "Success"
+        message: "Success",
     });
 }));
 exports.default = router;
