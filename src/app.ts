@@ -6,6 +6,8 @@ import logger from "morgan";
 import * as bodyParser from "body-parser";
 import api from "./api";
 import * as socketIO from "socket.io";
+import mongoose from "mongoose";
+import { DB_END_POINT } from "./configs/db";
 
 const timezone = "UTC";
 process.env.TZ = timezone;
@@ -19,6 +21,15 @@ app.use(session(sessionConfig));
 app.use(cors());
 
 app.use("/api", api);
+
+mongoose.connect(
+  DB_END_POINT,
+  {
+    useNewUrlParser: true,
+  },
+);
+
+console.log("Success to connect with DB");
 
 const server = app.listen(8080, () => {
   console.log("Example app listening on port 8080!");

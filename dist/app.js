@@ -17,6 +17,7 @@ const session_1 = __importDefault(require("./configs/session"));
 const morgan_1 = __importDefault(require("morgan"));
 const bodyParser = __importStar(require("body-parser"));
 const api_1 = __importDefault(require("./api"));
+const socketIO = __importStar(require("socket.io"));
 const timezone = "UTC";
 process.env.TZ = timezone;
 const app = express_1.default();
@@ -26,7 +27,11 @@ app.use(bodyParser.json());
 app.use(express_session_1.default(session_1.default));
 app.use(cors_1.default());
 app.use("/api", api_1.default);
-app.listen(8080, () => {
+const server = app.listen(8080, () => {
     console.log("Example app listening on port 8080!");
+});
+const io = socketIO.listen(server);
+io.on("connection", (socket) => {
+    console.log("a user connected");
 });
 //# sourceMappingURL=app.js.map
