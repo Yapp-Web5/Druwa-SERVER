@@ -5,7 +5,8 @@
   "main": "app.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc && nodemon"
+    "start": "tsc && nodemon",
+    "swagger": "tsoa swagger"
   },
   "keywords": [],
   "author": "",

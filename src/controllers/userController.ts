@@ -5,8 +5,14 @@ const router = express.Router();
 
 router.post("/", async (req: express.Request, res: express.Response) => {
   try {
-    const user = new UserModel();
-    const result = user.save();
+    const { username, email } = req.body;
+    const userObject = {
+      username: username as string,
+      email: email as string,
+      createdAt: new Date(),
+    } as User;
+    const user = new UserModel(userObject);
+    const result = await user.save();
     return res.send(result);
   } catch (err) {
     return res.status(500).send(err);
