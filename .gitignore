@@ -1,2 +1,3 @@
+dist
 node_modules
 src/configs/_db_account.ts
