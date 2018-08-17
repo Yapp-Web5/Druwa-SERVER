@@ -1,6 +1,7 @@
 /*
 
-  Notice! You must create '_db_account.ts' file in this directory to operate server
+  Notice! You must create '_db_account.ts' file in this directory 
+  according to this guide to operate server
 
   example) 
   : _db_account.ts
@@ -18,7 +19,7 @@
   After creating '_db_account.ts' file, Never upload '_db_account.ts' file to 
   any Github repository including Druwa-SERVER. 
 
-  Basically '_db_account.ts' is registered in .gitignore.
+  Basically '_db_account.ts' is already registered in .gitignore.
 
 */
 
