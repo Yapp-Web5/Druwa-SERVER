@@ -1,5 +1,6 @@
 import { User, UserSchema } from "./UserModel";
 import { Schema, Document, model } from "mongoose";
+import { CommentSchema } from "./CommentModel";
 
 export interface Room extends Document {
   id: number;
@@ -11,6 +12,9 @@ export interface Room extends Document {
   password: string | null;
   maxParticipants: number;
   participants: User[];
+  createAt: Date;
+  pdfPath: String;
+  comments: Comment[];
 }
 
 export const RoomSchema = new Schema({
@@ -55,6 +59,14 @@ export const RoomSchema = new Schema({
       type: UserSchema,
     },
   ],
+  createdAt: {
+    type: Date,
+    required: true,
+    default: Date.now,
+  },
+  comments: [{
+    type: CommentSchema,
+  }],
 });
 
 export const RoomModel = model("Room", RoomSchema);
