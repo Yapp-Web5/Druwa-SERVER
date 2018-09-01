@@ -14,7 +14,7 @@ router.use("/rooms", roomController);
 router.use("/users", userController);
 router.use("/test", testController);
 router.use("/rootcomment", rootcommentController);
-router.use("/comment", commentController);
+router.use("/comments", commentController);
 router.use("/like", likeController);
 router.use("/files", uploadController);
 
