@@ -5,14 +5,11 @@ export interface User extends Document {
   token: string;
   username: string;
   createdAt: Date;
+  email: string;
+  password: string | null;
 }
 
 export const UserSchema = new Schema({
-  // id: {
-  //   type: Number,
-  //   required: true,
-  //   unique: true,
-  // },
   token: {
     type: String,
     required: true,
@@ -27,6 +24,11 @@ export const UserSchema = new Schema({
     type: Date,
     required: true,
     default: Date.now,
+  },
+  email: {
+    type: String,
+    unique: true,
+    required: false,
   },
 });
 
