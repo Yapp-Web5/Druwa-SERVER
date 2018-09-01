@@ -5,7 +5,7 @@ import userController from "./controllers/userController";
 
 const router = express.Router();
 
-router.use("/room", roomController);
-router.use("/user", userController);
+router.use("/rooms", roomController);
+router.use("/users", userController);
 
 export default router;
