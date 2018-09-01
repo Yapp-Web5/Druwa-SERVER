@@ -1,4 +1,4 @@
-# Druwa-SERVERzzzzzzzzzzzz
+# Druwa-SERVER
 
 Druwa SERVER
 
