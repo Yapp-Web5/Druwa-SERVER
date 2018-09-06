@@ -16,7 +16,6 @@ router.post("/", async (req: express.Request, res: express.Response) => {
       password,
       maxParticipants,
       // participants,
-      createAt,
       pdfPath,
       // comments,
     } = req.body;
@@ -30,7 +29,7 @@ router.post("/", async (req: express.Request, res: express.Response) => {
       password: password as string,
       maxParticipants: maxParticipants as number,
       // participants,
-      createAt: new Date(),
+      createdAt: new Date(),
       pdfPath: pdfPath as string,
       // comments
     } as Room;
