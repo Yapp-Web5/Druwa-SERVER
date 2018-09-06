@@ -7,7 +7,7 @@ const router = express.Router();
 router.post("/", async (req: express.Request, res: express.Response) => {
   try {
     const {
-      id,
+      _id,
       url,
       title,
       description,
@@ -20,10 +20,12 @@ router.post("/", async (req: express.Request, res: express.Response) => {
       // comments,
     } = req.body;
     const roomObject = {
-      id: id as number,
       url: url as string,
       title: title as string,
       description: description as string,
+      admins: [],
+      participants: [],
+      comments: [],
       // admins : new UserModel(userObject),
       isPublic: isPublic as boolean,
       password: password as string,
@@ -32,8 +34,9 @@ router.post("/", async (req: express.Request, res: express.Response) => {
       createdAt: new Date(),
       pdfPath: pdfPath as string,
       // comments
-    } as Room;
+    } as Partial<Room>;
     const room = new RoomModel(roomObject);
+    console.log(room);
     const result = await room.save();
     return res.send(result);
   } catch (err) {

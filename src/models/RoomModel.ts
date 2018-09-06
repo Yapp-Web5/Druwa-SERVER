@@ -3,7 +3,7 @@ import { Schema, Document, model } from "mongoose";
 import { CommentSchema } from "./CommentModel";
 
 export interface Room extends Document {
-  id: number;
+  // _id: string;
   url: string;
   title: string;
   description: string;
@@ -18,11 +18,11 @@ export interface Room extends Document {
 }
 
 export const RoomSchema = new Schema({
-  id: {
-    type: Number,
-    required: true,
-    unique: true,
-  },
+  // _id: {
+  //   type: String,
+  //   required: true,
+  //   unique: true,
+  // },
   url: {
     type: String,
     required: true,
@@ -39,7 +39,7 @@ export const RoomSchema = new Schema({
   admins: [
     {
       type: UserSchema,
-      require: true,
+      // require: true,
     },
   ],
   isPublic: {
@@ -71,4 +71,4 @@ export const RoomSchema = new Schema({
   ],
 });
 
-export const RoomModel = model<Room>("Room", RoomSchema);
+export const RoomModel = model<Room>("room", RoomSchema);
