@@ -13,7 +13,7 @@ export interface Room extends Document {
   maxParticipants: number;
   participants: User[];
   createAt: Date;
-  pdfPath: String;
+  pdfPath: string;
   comments: Comment[];
 }
 
