@@ -12,7 +12,7 @@ export interface Room extends Document {
   password: string | null;
   maxParticipants: number;
   participants: User[];
-  createAt: Date;
+  createdAt: Date;
   pdfPath: string;
   comments: Comment[];
 }
@@ -64,9 +64,11 @@ export const RoomSchema = new Schema({
     required: true,
     default: Date.now,
   },
-  comments: [{
-    type: CommentSchema,
-  }],
+  comments: [
+    {
+      type: CommentSchema,
+    },
+  ],
 });
 
 export const RoomModel = model("Room", RoomSchema);
