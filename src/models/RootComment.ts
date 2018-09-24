@@ -1,10 +1,10 @@
-import { UserSchema, User } from "./UserModel"
+import { UserSchema, User } from "./UserModel";
 import { Like, LikeSchema } from "./LikeModel";
 import { Schema, Document, model } from "mongoose";
 
 export interface RootComment extends Document {
   author: User;
-  content: string
+  content: string;
   refpageidx: number;
   likes: Like[];
 }
@@ -20,7 +20,10 @@ export const RootCommentSchema = new Schema({
   refpageidx: {
     type: Number,
     required: true,
-  }
+  },
 });
 
-export const RootCommentModel = model<RootComment>("RootComment", RootCommentSchema);
+export const RootCommentModel = model<RootComment>(
+  "RootComment",
+  RootCommentSchema,
+);

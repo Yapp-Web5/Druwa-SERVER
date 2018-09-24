@@ -6,9 +6,11 @@ export interface Comments extends Document {
 }
 
 export const CommentSchema = new Schema({
-  comments: [{
-    type: RootCommentSchema
-  }],
+  comments: [
+    {
+      type: RootCommentSchema,
+    },
+  ],
 });
 
 export const RootCommentModel = model<Comments>("Comments", CommentSchema);
