@@ -6,11 +6,12 @@ const router = express.Router();
 
 router.post("/", async (req: express.Request, res: express.Response) => {
   try {
-    const { username } = req.body;
+    const { username, email } = req.body;
     const token = crypto.SHA256(new Date().toString()).toString();
     const userObject = {
       token,
       username: username as string,
+      email: email as string,
       createdAt: new Date(),
     } as User;
     const user = new UserModel(userObject);
