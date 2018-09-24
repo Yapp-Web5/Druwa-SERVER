@@ -1,7 +1,6 @@
 import { Schema, Document, model } from "mongoose";
 
 export interface User extends Document {
-  // id: number;
   token: string;
   username: string;
   createdAt: Date;
@@ -33,6 +32,7 @@ export const UserSchema = new Schema({
     unique: true,
     required: false,
     index: true,
+    sparse: true,
   },
 });
 
