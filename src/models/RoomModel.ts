@@ -1,9 +1,9 @@
-import { User, UserSchema } from "./UserModel";
 import { Schema, Document, model } from "mongoose";
-import { CommentSchema } from "./CommentModel";
+
+import { User, UserSchema } from "./UserModel";
+import { RootCommentSchema } from "./RootComment";
 
 export interface Room extends Document {
-  // _id: string;
   url: string;
   title: string;
   description: string;
@@ -18,41 +18,42 @@ export interface Room extends Document {
 }
 
 export const RoomSchema = new Schema({
-  // _id: {
-  //   type: String,
-  //   required: true,
-  //   unique: true,
-  // },
   url: {
     type: String,
     required: true,
     unique: true,
+    index: true,
   },
   title: {
     type: String,
     required: true,
+    index: true,
   },
   description: {
     type: String,
     default: "",
+    index: true,
   },
   admins: [
     {
       type: UserSchema,
-      // require: true,
+      require: true,
     },
   ],
   isPublic: {
     type: Boolean,
     required: true,
+    index: true,
   },
   password: {
     type: String,
+    index: true,
   },
   maxParticipants: {
     type: Number,
     required: true,
     default: 100,
+    index: true,
   },
   participants: [
     {
@@ -63,10 +64,11 @@ export const RoomSchema = new Schema({
     type: Date,
     required: true,
     default: Date.now,
+    index: true,
   },
   comments: [
     {
-      type: CommentSchema,
+      type: RootCommentSchema,
     },
   ],
 });
