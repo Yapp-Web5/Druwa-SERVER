@@ -31,4 +31,19 @@ router.post("/", async (req: express.Request, res: express.Response) => {
   }
 });
 
+router.post("/:id", async (req: express.Request, res: express.Response) => {
+  try {
+    const { id } = req.params;
+    await UserModel.findById(id).update({
+      _password: req.params.password,
+      _userName: req.params.userName,
+      _email: req.params.email,
+    });
+
+    return res.send(id);
+  } catch (err) {
+    return res.status(500).send(err);
+  }
+});
+
 export default router;
