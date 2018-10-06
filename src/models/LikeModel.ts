@@ -1,21 +1,21 @@
 import { Schema, Document, model } from "mongoose";
-import { User, UserSchema } from "./UserModel";
-import { RootComment, RootCommentSchema } from "./RootComment";
 
 export interface Like extends Document {
-  comments: RootComment;
-  user: User;
+  rootcomment_id: string;
+  user: string;
 }
 
 export const LikeSchema = new Schema({
-  comments: {
-    type: RootCommentSchema,
+  rootcomment_id: {
+    type: String,
+    required: true,
+    index: true,
   },
   user: {
-    type: UserSchema,
+    type: String,
     required: true,
+    index: true,
   },
 });
 
-
-export const LikeModel = model<Like>("Like", LikeSchema);
+export const LikeModel = model<Like>("like", LikeSchema);

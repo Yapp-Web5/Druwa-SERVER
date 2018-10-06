@@ -1,10 +1,11 @@
 import { Schema, Document, model } from "mongoose";
 
 import { User, UserSchema } from "./UserModel";
-import { RootCommentSchema } from "./RootComment";
+import { RootCommentSchema } from "./RootCommentModel";
 
 export interface Room extends Document {
   url: string;
+  lecturer: string;
   title: string;
   description: string;
   admins: User[];
@@ -20,57 +21,61 @@ export interface Room extends Document {
 export const RoomSchema = new Schema({
   url: {
     type: String,
-    required: true,
+    required: false,
     unique: true,
-    index: true,
+    index: true
+  },
+  lecturer: {
+    type: String,
+    required: true,
+    index: true
   },
   title: {
     type: String,
     required: true,
-    index: true,
+    index: true
   },
   description: {
     type: String,
     default: "",
-    index: true,
+    index: true
   },
   admins: [
     {
-      type: UserSchema,
-      require: true,
-    },
+      type: Schema.Types.ObjectId,
+      ref: "user",
+      require: true
+    }
   ],
+
   isPublic: {
     type: Boolean,
     required: true,
-    index: true,
+    index: true
   },
   password: {
     type: String,
-    index: true,
+    index: true
   },
   maxParticipants: {
     type: Number,
     required: true,
     default: 100,
-    index: true,
+    index: true
   },
   participants: [
     {
-      type: UserSchema,
-    },
+      type: Schema.Types.ObjectId,
+      ref: "user"
+    }
   ],
   createdAt: {
     type: Date,
     required: true,
     default: Date.now,
-    index: true,
+    index: true
   },
-  comments: [
-    {
-      type: RootCommentSchema,
-    },
-  ],
+  comments: [RootCommentSchema]
 });
 
 export const RoomModel = model<Room>("room", RoomSchema);

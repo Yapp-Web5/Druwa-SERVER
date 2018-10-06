@@ -1,16 +1,40 @@
 import { Schema, Document, model } from "mongoose";
-import { RootComment, RootCommentSchema } from "./RootComment";
+import { User, UserSchema } from "./UserModel";
+import { RootComment } from "./RootCommentModel";
 
-export interface Comments extends Document {
-  comments: RootComment[];
+export interface Comment extends Document {
+  rootComment: RootComment;
+  author: User;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const CommentSchema = new Schema({
-  comments: [
-    {
-      type: RootCommentSchema,
-    },
-  ],
+  rootComment: {
+    type: Schema.Types.ObjectId,
+    ref: "rootComment",
+    required: true,
+    index: true,
+  },
+  author: {
+    type: Schema.Types.ObjectId,
+    ref: "user",
+    required: true,
+    index: true,
+  },
+  content: {
+    type: String,
+    index: true,
+  },
+  createdAt: {
+    type: Date,
+    index: true,
+  },
+  updatedAt: {
+    type: Date,
+    index: true,
+  },
 });
 
-export const RootCommentModel = model<Comments>("Comments", CommentSchema);
+export const CommentModel = model<Comment>("comment", CommentSchema);
