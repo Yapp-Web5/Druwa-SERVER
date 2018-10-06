@@ -18,5 +18,4 @@ export const LikeSchema = new Schema({
   },
 });
 
-
-export const LikeModel = model<Like>("Like", LikeSchema);
+export const LikeModel = model<Like>("like", LikeSchema);

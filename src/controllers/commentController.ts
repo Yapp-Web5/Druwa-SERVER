@@ -1,121 +1,104 @@
 import express from "express";
 import * as _ from "lodash";
-import { Comment, CommentModel } from '../models/CommentModel';
-import { RootComment, RootCommentModel } from "../models/RootComment";
+import { Comment, CommentModel } from "../models/CommentModel";
+import { RootComment, RootCommentModel } from "../models/RootCommentModel";
 import { User, UserModel } from "../models/UserModel";
 import { CursorCommentOptions } from "mongodb";
 
 const router = express.Router();
 
-//find
-router.get("/:rootcomment_id", async (req: express.Request, res: express.Response) => {
+// find
+router.get("/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const data = await CommentModel.findOne({ rootcomment_id: req.params.rootcomment_id });
-    console.log(data);
+    const { id } = req.params;
+    const data = await CommentModel.findOne({
+      _id: id,
+    }).populate(["rootComment", "author"]);
     return res.send(data);
   } catch (err) {
     return res.status(404).send(err);
   }
 });
 
-//save
+// save
 router.post("/", async (req: express.Request, res: express.Response) => {
   try {
     const now = new Date();
-
-    const {
-      rootcomment_id,
-      content,
-    } = req.body;
-
-    const getrootcomment = await RootCommentModel.findOne({_id: rootcomment_id});
-
-    if(getrootcomment != null){
-
+    const { token } = req.headers;
+    const { rootcomment_id, content } = req.body;
+    const rootComment = await RootCommentModel.findOne({
+      _id: rootcomment_id,
+    });
+    const user = await UserModel.findOne({ token });
+    if (rootComment && user) {
       const commentObject = {
-        rootcomment_id: rootcomment_id as string,
-        author: req.headers.token as string,
+        rootComment: rootComment._id,
+        author: user._id,
         content: content as string,
         createdAt: now,
         updatedAt: now,
       } as Partial<Comment>;
 
       const comment = new CommentModel(commentObject);
-      console.log(comment);
-  
       const result = await comment.save();
-      
-      const data = await getrootcomment.update({comments: getrootcomment.comments.concat(comment)});
-      await getrootcomment.save();
-      console.log(data);
+      await rootComment.update({
+        comments: rootComment.comments.concat(comment),
+      });
+      await rootComment.save();
       return res.send(result);
-    }else{
+    } else {
       return res.send("failed");
     }
-
   } catch (err) {
     return res.status(500).send(err);
   }
 });
 
-
-//update
-router.put("/", async (req: express.Request, res: express.Response) => {
+// update
+router.put("/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const {
-      rootcomment_id,
-      content,
-    } = req.body;
+    const { token } = req.headers;
+    const { id } = req.params;
+    const { content } = req.body;
 
-    const getrootcomment = await RootCommentModel.find({rootcomment_id: req.params.rootcomment_id});
-    if(getrootcomment != null){
-      const commentObject = {
-        rootcomment_id: rootcomment_id as string,
-        author: req.headers.token as string,
-        content: content as string,
-        updatedAt : new Date(),
-      } as Partial<Comment>;
-  
-      const getcomment = await CommentModel.findOne({rootcomment_id: req.body.rootcomment_id});
+    const comment = await CommentModel.findOne({ _id: id });
+    const user = await UserModel.findOne({ token });
 
-      if(getcomment != null){
-        if (getcomment.author === req.headers.token){
-          const result = await getcomment.update(commentObject);
-          return res.send(result);
-        }
+    if (comment && user) {
+      if (comment.author.token !== token) {
+        throw new Error("The user is not author of this comment");
       }
-    }else{
-      return res.send("no");
+
+      const result = await comment.update({ content });
+      return res.send(result);
     }
-   
+    throw new Error("Failed to find comment or user");
   } catch (err) {
     return res.status(500).send(err);
   }
 });
 
-//delete
-router.delete("/:comment_id", async (req: express.Request, res: express.Response) => {
+// delete
+router.delete("/:id", async (req: express.Request, res: express.Response) => {
   try {
+    const { id } = req.params;
+    const { token } = req.headers;
 
-    const comment = await CommentModel.findOne({_id: req.params.comment_id });
-    if (comment) {
-      const rootComment = await RootCommentModel.findOne({_id: comment.rootcomment_id });
-      if (rootComment) {
-        const comments = rootComment.comments;
-        _.remove(comments, (item) => {
-          return item._id.toString() === req.params.comment_id     
-        });
+    const user = await UserModel.findOne({ token });
+    const comment = await CommentModel.findOne({ _id: id });
 
-        await rootComment.update({ comments });
-        await comment.remove();
-        return res.send(comments);
+    if (user && comment) {
+      if (user.token !== token) {
+        throw new Error("The use is not author of this comment");
       }
-    }
 
+      const result = await comment.remove();
+      return res.send(result);
+    }
+    throw new Error("Failed to find comment or user");
   } catch (err) {
     return res.status(500).send(err);
   }
 });
-
 
 export default router;
