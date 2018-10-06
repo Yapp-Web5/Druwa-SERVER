@@ -21,7 +21,7 @@ export interface Room extends Document {
 export const RoomSchema = new Schema({
   url: {
     type: String,
-    required: true,
+    required: false,
     unique: true,
     index: true
   },
