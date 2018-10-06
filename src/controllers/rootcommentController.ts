@@ -1,26 +1,28 @@
 import express, { json } from "express";
-import { RootComment, RootCommentModel, RootCommentSchema } from '../models/RootComment'
+import {
+  RootComment,
+  RootCommentModel,
+  RootCommentSchema,
+} from "../models/RootCommentModel";
 import { User, UserModel } from "../models/UserModel";
 import { Schema } from "mongoose";
 import { CommentSchema, Comment, CommentModel } from "../models/CommentModel";
 
 const router = express.Router();
 
-
 router.get("/", async (req: express.Request, res: express.Response) => {
   try {
-    const data = await RootCommentModel.find();
+    const data = await RootCommentModel.find().populate(["author", "comments"]);
     return res.send(data);
   } catch (err) {
     return res.status(404).send(err);
   }
 });
 
-
 router.get("/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const getid = req.params.id;
-    const data = await RootCommentModel.findOne({ _id: getid });
+    const { id } = req.params;
+    const data = await RootCommentModel.findOne({ _id: id });
     return res.send(data);
   } catch (err) {
     return res.status(404).send(err);
@@ -28,51 +30,55 @@ router.get("/:id", async (req: express.Request, res: express.Response) => {
 });
 
 router.post("/", async (req: express.Request, res: express.Response) => {
-
   try {
-    const authors = req.headers.token;
-    const user = await UserModel.findOne({ token: authors });
-    console.log(user);
+    const { token } = req.headers;
+    const { content, refpageidx } = req.body;
+    const user = await UserModel.findOne({ token });
 
+    if (!user) {
+      throw new Error("Can't not find user");
+    }
     const now = new Date();
 
     const rootmodel = {
-      author: authors,
-      content: req.body.content,
-      refpageidx: req.body.refpageidx,
+      author: user._id,
+      content,
+      refpageidx,
       createdAt: now,
       updatedAt: now,
     };
-    const newrootcomment = new RootCommentModel(rootmodel);
 
-    const data = await newrootcomment.save();
-
+    const rootComment = new RootCommentModel(rootmodel);
+    const data = await rootComment.save();
     return res.send(data);
   } catch (err) {
     return res.status(404).send(err);
   }
 });
 
-
 router.put("/:id", async (req: express.Request, res: express.Response) => {
-
   try {
-    const getcomment = await RootCommentModel.findOne({ _id: req.body.id });
-    if (getcomment != null) {
-      if (getcomment.author === req.headers.token) {
-        const now = new Date();
+    const { id } = req.params;
+    const { token } = req.headers;
+    const { author, content, refpageidx } = req.body;
+    const getcomment = await RootCommentModel.findOne({ _id: id }).populate(
+      "author",
+    );
 
+    if (getcomment != null) {
+      if (getcomment.author.token === token) {
+        const now = new Date();
         const rootmodel = {
-          author: req.body.author,
-          content: req.body.content,
-          refpageidx: req.body.refpageidx,
+          author,
+          refpageidx,
+          content,
           updatedAt: now,
         };
-        const data = await RootCommentModel.find({ _id: req.body.id }).update(rootmodel);
+        const data = await getcomment.update(rootmodel);
+        await getcomment.save();
         return res.send(data);
       }
     }
-
   } catch (err) {
     return res.status(404).send(err);
   }
@@ -80,11 +86,16 @@ router.put("/:id", async (req: express.Request, res: express.Response) => {
 
 router.delete("/:id", async (req: express.Request, res: express.Response) => {
   try {
-
-    const getcomment = await RootCommentModel.findOne({ _id: req.body.id });
+    const { id } = req.params;
+    const { token } = req.headers;
+    const getcomment = await RootCommentModel.findOne({ _id: id }).populate(
+      "author",
+    );
     if (getcomment != null) {
-      if (getcomment.author === req.headers.token) {
-        await RootCommentModel.remove({ _id: req.body.id });
+      if (getcomment.author.token === token) {
+        // await RootCommentModel.remove({ _id: id });
+        await getcomment.remove();
+        return res.send(getcomment);
       }
     }
   } catch (err) {
@@ -92,7 +103,21 @@ router.delete("/:id", async (req: express.Request, res: express.Response) => {
   }
 });
 
-
-
+// router.put("/:id/like", async (req: express.Request, res: express.Response) => {
+//   try {
+//     const { id } = req.params;
+//     const { token } = req.headers;
+//     const user = await UserModel.findOne({ token });
+//     const getcomment = await RootCommentModel.findOne({ _id: id }).populate(
+//       "author",
+//     );
+//     if (getcomment && user) {
+//       getcomment.comments.
+//       getcomment.update({ likes: getcomment.likes.concat(user._id) });
+//     }
+//   } catch (err) {
+//     return res.status(404).send(err);
+//   }
+// });
 
 export default router;

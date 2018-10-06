@@ -1,7 +1,7 @@
 import { Schema, Document, model } from "mongoose";
 
 import { User, UserSchema } from "./UserModel";
-import { RootCommentSchema } from "./RootComment";
+import { RootCommentSchema } from "./RootCommentModel";
 
 export interface Room extends Document {
   url: string;
