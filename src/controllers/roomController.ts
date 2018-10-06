@@ -39,6 +39,11 @@ router.post("/", async (req: express.Request, res: express.Response) => {
     const room = new RoomModel(roomObject);
     console.log(room);
     const result = await room.save();
+
+    const getUrl = result.title.charCodeAt(0).toString() + result._id;
+    await result.update({ url: getUrl });
+    await result.save();
+
     return res.send(result);
   } catch (err) {
     return res.status(500).send(err);
