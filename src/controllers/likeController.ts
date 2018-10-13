@@ -23,7 +23,7 @@ router.post("/", async (req: express.Request, res: express.Response) => {
       const result = await like.save();
 
       const data = await find_root.update({
-        likes: find_root.likes.concat(like),
+        // likes: find_root.likes.concat(like),
       });
       await find_root.save();
 
