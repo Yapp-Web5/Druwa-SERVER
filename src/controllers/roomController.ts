@@ -11,7 +11,7 @@ router.post("/", async (req: express.Request, res: express.Response) => {
     if (!user) {
       res.status(401).send({ message: "Not found user" });
     }
-    console.log(user);
+    // console.log(user);
     const {
       lecturer,
       url,
@@ -24,7 +24,7 @@ router.post("/", async (req: express.Request, res: express.Response) => {
     } = req.body;
     const roomObject = {
       lecturer: lecturer as string,
-      url: url as string,
+      url: title as string,
       title: title as string,
       description: description as string,
       admins: [user],
@@ -37,11 +37,9 @@ router.post("/", async (req: express.Request, res: express.Response) => {
       pdfPath: pdfPath as string,
     } as Partial<Room>;
     const room = new RoomModel(roomObject);
-    console.log(room);
     const result = await room.save();
-
-    const getUrl = result.title.charCodeAt(0).toString() + result._id;
-    await result.update({ url: getUrl });
+    // const getUrl = `${result.title.charCodeAt(0).toString()}${result._id}`;
+    // await result.update({ url: getUrl });
     await result.save();
 
     return res.send(result);
@@ -50,15 +48,35 @@ router.post("/", async (req: express.Request, res: express.Response) => {
   }
 });
 
-router.get("/:_id", async (req: express.Request, res: express.Response) => {
+router.get("/:url", async (req: express.Request, res: express.Response) => {
   try {
-    const data = await RoomModel.findOne({ _id: req.params._id });
-    console.log(data);
+    const { url } = req.params;
+    const data = await RoomModel.findOne({ url });
+    // console.log(data);
     return res.send(data);
   } catch (err) {
     return res.status(404).send(err);
   }
 });
+
+router.put(
+  "/enter/:url",
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const { url } = req.params;
+      const { token } = req.headers;
+      const user = await UserModel.findOne({ token });
+      let room = await RoomModel.findOne({ url });
+      if (room && user) {
+        await RoomModel.update({ url }, { $push: { participants: user._id } });
+      }
+      room = await RoomModel.findOne({ url });
+      return res.send(room);
+    } catch (err) {
+      return res.status(404).send(err);
+    }
+  },
+);
 
 router.put("/:_id", async (req: express.Request, res: express.Response) => {
   try {
@@ -105,4 +123,5 @@ router.delete("/:_id", async (req: express.Request, res: express.Response) => {
     return res.status(400).send(err);
   }
 });
+
 export default router;
