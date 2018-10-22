@@ -4,8 +4,8 @@ import AWS from "aws-sdk";
 import * as bodyParser from "body-parser";
 AWS.config.region = "ap-northeast-2";
 AWS.config.update({
-  accessKeyId: "AKIAIPGC2ET6NNFNYWMQ",
-  secretAccessKey: "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",
+  accessKeyId: "",
+  secretAccessKey: "",
 });
 const app = express();
 // const url = "https://s3.ap-northeast-2.amazonaws.com/druwaupload/test1";
