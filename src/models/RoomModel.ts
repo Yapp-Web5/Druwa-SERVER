@@ -1,7 +1,7 @@
 import { Schema, Document, model } from "mongoose";
 
 import { User, UserSchema } from "./UserModel";
-import { RootCommentSchema } from "./RootCommentModel";
+import { CardSchema } from "./CardModel";
 
 export interface Room extends Document {
   url: string;
@@ -74,7 +74,7 @@ export const RoomSchema = new Schema({
     default: Date.now,
     index: true,
   },
-  comments: [RootCommentSchema],
+  comments: [CardSchema],
 });
 
 export const RoomModel = model<Room>("room", RoomSchema);

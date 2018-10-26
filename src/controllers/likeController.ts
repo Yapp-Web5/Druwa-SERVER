@@ -2,14 +2,14 @@ import express from "express";
 import * as _ from "lodash";
 import { CursorCommentOptions } from "mongodb";
 import { Like, LikeModel } from "../models/LikeModel";
-import { RootComment, RootCommentModel } from "../models/RootCommentModel";
+import { Card, CardModel } from "../models/CardModel";
 
 const router = express.Router();
 
 // 좋아요 누름
 router.post("/", async (req: express.Request, res: express.Response) => {
   try {
-    const find_root = await RootCommentModel.findOne({
+    const find_root = await CardModel.findOne({
       _id: req.body.rootcomment_id,
     });
     if (find_root != null) {
@@ -37,7 +37,7 @@ router.post("/", async (req: express.Request, res: express.Response) => {
 // 좋아요 취소
 router.delete("/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const find_root = await RootCommentModel.findOne({ _id: req.params.id });
+    const find_root = await CardModel.findOne({ _id: req.params.id });
     if (find_root != null) {
       const getlike = await LikeModel.findOne({ _id: req.params.id });
       if (getlike != null) {

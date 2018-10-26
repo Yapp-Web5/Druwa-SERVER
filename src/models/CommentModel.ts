@@ -1,9 +1,9 @@
 import { Schema, Document, model } from "mongoose";
 import { User, UserSchema } from "./UserModel";
-import { RootComment } from "./RootCommentModel";
+import { Card } from "./CardModel";
 
 export interface Comment extends Document {
-  rootComment: RootComment;
+  rootComment: Card;
   author: User;
   content: string;
   createdAt: Date;
@@ -11,7 +11,7 @@ export interface Comment extends Document {
 }
 
 export const CommentSchema = new Schema({
-  rootComment: {
+  parentCard: {
     type: Schema.Types.ObjectId,
     ref: "rootComment",
     required: true,
