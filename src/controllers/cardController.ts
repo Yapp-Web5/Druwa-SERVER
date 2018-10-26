@@ -1,28 +1,29 @@
 import express, { json } from "express";
-import {
-  RootComment,
-  RootCommentModel,
-  RootCommentSchema,
-} from "../models/RootCommentModel";
+import { Card, CardModel, CardSchema } from "../models/CardModel";
 import { User, UserModel } from "../models/UserModel";
 import { Schema } from "mongoose";
 import { CommentSchema, Comment, CommentModel } from "../models/CommentModel";
+import { checkAuth } from "../middlewares/auth";
 
 const router = express.Router();
 
-router.get("/", async (req: express.Request, res: express.Response) => {
-  try {
-    const data = await RootCommentModel.find().populate(["author", "comments"]);
-    return res.send(data);
-  } catch (err) {
-    return res.status(404).send(err);
-  }
-});
+router.get(
+  "/",
+  checkAuth,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const data = await CardModel.find().populate(["author", "comments"]);
+      return res.send(data);
+    } catch (err) {
+      return res.status(404).send(err);
+    }
+  },
+);
 
 router.get("/:id", async (req: express.Request, res: express.Response) => {
   try {
     const { id } = req.params;
-    const data = await RootCommentModel.findOne({ _id: id });
+    const data = await CardModel.findById(id).populate(["author", "comments"]);
     return res.send(data);
   } catch (err) {
     return res.status(404).send(err);
@@ -48,7 +49,7 @@ router.post("/", async (req: express.Request, res: express.Response) => {
       updatedAt: now,
     };
 
-    const rootComment = new RootCommentModel(rootmodel);
+    const rootComment = new CardModel(rootmodel);
     const data = await rootComment.save();
     return res.send(data);
   } catch (err) {
@@ -61,9 +62,7 @@ router.put("/:id", async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
     const { token } = req.headers;
     const { author, content, refpageidx } = req.body;
-    const getcomment = await RootCommentModel.findOne({ _id: id }).populate(
-      "author",
-    );
+    const getcomment = await CardModel.findOne({ _id: id }).populate("author");
 
     if (getcomment != null) {
       if (getcomment.author.token === token) {
@@ -88,9 +87,7 @@ router.delete("/:id", async (req: express.Request, res: express.Response) => {
   try {
     const { id } = req.params;
     const { token } = req.headers;
-    const getcomment = await RootCommentModel.findOne({ _id: id }).populate(
-      "author",
-    );
+    const getcomment = await CardModel.findOne({ _id: id }).populate("author");
     if (getcomment != null) {
       if (getcomment.author.token === token) {
         // await RootCommentModel.remove({ _id: id });

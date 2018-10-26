@@ -3,7 +3,7 @@ import { Like, LikeSchema } from "./LikeModel";
 import { Schema, Document, model, Mongoose } from "mongoose";
 import { CommentSchema, Comment } from "./CommentModel";
 
-export interface RootComment extends Document {
+export interface Card extends Document {
   author: User;
   content: string;
   refpageidx: number;
@@ -13,7 +13,7 @@ export interface RootComment extends Document {
   updatedAt: Date;
 }
 
-export const RootCommentSchema = new Schema({
+export const CardSchema = new Schema({
   author: {
     type: Schema.Types.ObjectId,
     ref: "user",
@@ -53,7 +53,4 @@ export const RootCommentSchema = new Schema({
   },
 });
 
-export const RootCommentModel = model<RootComment>(
-  "rootComment",
-  RootCommentSchema,
-);
+export const CardModel = model<Card>("card", CardSchema);
