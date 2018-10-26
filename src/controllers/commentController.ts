@@ -1,24 +1,29 @@
 import express from "express";
 import * as _ from "lodash";
 import { Comment, CommentModel } from "../models/CommentModel";
-import { RootComment, RootCommentModel } from "../models/RootCommentModel";
+import { Card, CardModel } from "../models/CardModel";
 import { User, UserModel } from "../models/UserModel";
 import { CursorCommentOptions } from "mongodb";
+import { checkAuth } from "../middlewares/auth";
 
 const router = express.Router();
 
 // find
-router.get("/:id", async (req: express.Request, res: express.Response) => {
-  try {
-    const { id } = req.params;
-    const data = await CommentModel.findOne({
-      _id: id,
-    }).populate(["rootComment", "author"]);
-    return res.send(data);
-  } catch (err) {
-    return res.status(404).send(err);
-  }
-});
+router.get(
+  "/:id",
+  checkAuth,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const { id } = req.params;
+      const data = await CommentModel.findOne({
+        _id: id,
+      }).populate(["rootComment", "author"]);
+      return res.send(data);
+    } catch (err) {
+      return res.status(404).send(err);
+    }
+  },
+);
 
 // save
 router.post("/", async (req: express.Request, res: express.Response) => {
@@ -26,7 +31,7 @@ router.post("/", async (req: express.Request, res: express.Response) => {
     const now = new Date();
     const { token } = req.headers;
     const { rootcomment_id, content } = req.body;
-    const rootComment = await RootCommentModel.findOne({
+    const rootComment = await CardModel.findOne({
       _id: rootcomment_id,
     });
     const user = await UserModel.findOne({ token });
