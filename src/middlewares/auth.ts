@@ -1,6 +1,17 @@
 import express from "express";
 import { UserModel } from "../models/UserModel";
 
+const ERROR = {
+  NO_TOKEN: {
+    status: 401,
+    message: "Can not find token in your request.",
+  },
+  INVALID_TOKEN: {
+    status: 404,
+    message: "Invalid user token",
+  },
+};
+
 export async function checkAuth(
   req: express.Request,
   res: express.Response,
@@ -9,14 +20,17 @@ export async function checkAuth(
   try {
     const token = req.headers.token;
     if (!token) {
-      throw new Error("Can not find token in your request.");
+      throw ERROR.NO_TOKEN;
     }
-    const user = await UserModel.findOne({ token });
+    const user = await UserModel.findOne({ token }, { password: 0 });
     if (!user) {
-      throw new Error("Can not find user related to the token.");
+      throw ERROR.INVALID_TOKEN;
     }
+    res.locals.user = user;
     return next();
   } catch (err) {
-    return res.status(401).send(err.data || { message: err.toString() });
+    return res
+      .status(err.status || 500)
+      .send({ message: err.message || err.toString() });
   }
 }
