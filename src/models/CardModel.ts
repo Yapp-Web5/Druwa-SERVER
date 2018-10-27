@@ -2,15 +2,17 @@ import { UserSchema, User } from "./UserModel";
 import { Like, LikeSchema } from "./LikeModel";
 import { Schema, Document, model, Mongoose } from "mongoose";
 import { CommentSchema, Comment } from "./CommentModel";
+import { Room } from "./RoomModel";
 
 export interface Card extends Document {
   author: User;
+  roomUrl: string;
   content: string;
-  refpageidx: number;
   likes: User[];
   comments: Comment[];
   createdAt: Date;
   updatedAt: Date;
+  refPageIdx?: number;
 }
 
 export const CardSchema = new Schema({
@@ -20,13 +22,13 @@ export const CardSchema = new Schema({
     index: true,
     required: true,
   },
-  content: {
+  roomUrl: {
     type: String,
     index: true,
     required: true,
   },
-  refpageidx: {
-    type: Number,
+  content: {
+    type: String,
     index: true,
     required: true,
   },
@@ -50,6 +52,10 @@ export const CardSchema = new Schema({
   updatedAt: {
     index: true,
     type: Date,
+  },
+  refPageIdx: {
+    type: Number,
+    index: true,
   },
 });
 

@@ -1,7 +1,7 @@
 import { Schema, Document, model } from "mongoose";
 
 import { User, UserSchema } from "./UserModel";
-import { CardSchema } from "./CardModel";
+import { Card } from "./CardModel";
 
 export interface Room extends Document {
   url: string;
@@ -15,7 +15,7 @@ export interface Room extends Document {
   participants: User[];
   createdAt: Date;
   pdfPath: string;
-  cards: Comment[];
+  cards: Card[];
 }
 
 export const RoomSchema = new Schema({
