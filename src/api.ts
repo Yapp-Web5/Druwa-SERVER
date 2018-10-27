@@ -10,7 +10,7 @@ import uploadController from "./controllers/uploadController";
 
 const router = express.Router();
 
-router.use("/card", cardController);
+router.use("/cards", cardController);
 router.use("/comment", commentController);
 router.use("/rooms", roomController);
 router.use("/users", userController);
