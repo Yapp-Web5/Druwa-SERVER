@@ -166,4 +166,74 @@ router.delete(
   },
 );
 
+router.put(
+  "/like/:id",
+  checkAuth,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const { id } = req.params;
+      const user: User = res.locals.user;
+      const card = await CardModel.findById(id).populate("author");
+      if (!card) {
+        throw ERROR.NO_CARD;
+      }
+
+      const updatedCard = await CardModel.findByIdAndUpdate(
+        id,
+        {
+          $addToSet: {
+            likes: user._id,
+          },
+        },
+        { new: true },
+      )
+        .populate(cardPopulateOption)
+        .exec();
+      if (!updatedCard) {
+        throw ERROR.FAILED_TO_UPDATE;
+      }
+      return res.send(updatedCard);
+    } catch (err) {
+      return res
+        .status(err.status || 500)
+        .send({ message: err.message || err.toString() });
+    }
+  },
+);
+
+router.put(
+  "/unlike/:id",
+  checkAuth,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const { id } = req.params;
+      const user: User = res.locals.user;
+      const card = await CardModel.findById(id).populate("author");
+      if (!card) {
+        throw ERROR.NO_CARD;
+      }
+
+      const updatedCard = await CardModel.findByIdAndUpdate(
+        id,
+        {
+          $pull: {
+            likes: user._id,
+          },
+        },
+        { new: true },
+      )
+        .populate(cardPopulateOption)
+        .exec();
+      if (!updatedCard) {
+        throw ERROR.FAILED_TO_UPDATE;
+      }
+      return res.send(updatedCard);
+    } catch (err) {
+      return res
+        .status(err.status || 500)
+        .send({ message: err.message || err.toString() });
+    }
+  },
+);
+
 export default router;
