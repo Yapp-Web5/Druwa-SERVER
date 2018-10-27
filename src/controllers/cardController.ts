@@ -1,120 +1,169 @@
-import express, { json } from "express";
-import { Card, CardModel, CardSchema } from "../models/CardModel";
-import { User, UserModel } from "../models/UserModel";
-import { Schema } from "mongoose";
-import { CommentSchema, Comment, CommentModel } from "../models/CommentModel";
+import express from "express";
+import { Card, CardModel } from "../models/CardModel";
+import { User } from "../models/UserModel";
+import { RoomModel } from "../models/RoomModel";
 import { checkAuth } from "../middlewares/auth";
+import ERROR from "../consts/error";
 
 const router = express.Router();
 
+export const cardPopulateOption = [
+  { path: "author", select: { username: 1 } },
+  { path: "comments", select: { username: 1 } },
+  { path: "likes", select: { username: 1 } },
+];
+
+const populateCard = async (card: Card) => {
+  const result = await card.populate(cardPopulateOption).execPopulate();
+  return result;
+};
+
 router.get(
-  "/",
+  "/:url",
   checkAuth,
-  async (req: express.Request, res: express.Response) => {
+  async (req: express.Request, res: express.Response, next: any) => {
     try {
-      const data = await CardModel.find().populate(["author", "comments"]);
-      return res.send(data);
+      const { url } = req.params;
+      const user: User = res.locals.user;
+
+      const room = await RoomModel.findOne({ url });
+      if (!room) {
+        throw ERROR.NO_ROOM;
+      }
+
+      if (room.participants.indexOf(user._id) === -1) {
+        throw ERROR.NO_PERMISSION;
+      }
+
+      const cards = await CardModel.find({ roomUrl: url }).populate(
+        cardPopulateOption,
+      );
+      return res.send(cards);
     } catch (err) {
-      return res.status(404).send(err);
+      return res
+        .status(err.status || 500)
+        .send({ message: err.message || err.toString() });
     }
   },
 );
 
-router.get("/:id", async (req: express.Request, res: express.Response) => {
-  try {
-    const { id } = req.params;
-    const data = await CardModel.findById(id).populate(["author", "comments"]);
-    return res.send(data);
-  } catch (err) {
-    return res.status(404).send(err);
-  }
-});
+router.post(
+  "/:url",
+  checkAuth,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const { url } = req.params;
+      const { content, refPageIdx } = req.body;
+      const room = await RoomModel.findOne({ url });
+      if (!room) {
+        throw ERROR.NO_ROOM;
+      }
 
-router.post("/", async (req: express.Request, res: express.Response) => {
-  try {
-    const { token } = req.headers;
-    const { content, refpageidx } = req.body;
-    const user = await UserModel.findOne({ token });
+      const user: User = res.locals.user;
+      const now = new Date();
+      const cardObject = {
+        author: user._id,
+        roomUrl: url,
+        content,
+        createdAt: now,
+        updatedAt: now,
+        refPageIdx,
+      };
 
-    if (!user) {
-      throw new Error("Can't not find user");
+      const card = new CardModel(cardObject);
+      const data = await card.save();
+
+      await room
+        .update({
+          $push: {
+            cards: data._id,
+          },
+        })
+        .exec();
+      await room.save();
+      return res.send(data);
+    } catch (err) {
+      return res
+        .status(err.status || 500)
+        .send({ message: err.message || err.toString() });
     }
-    const now = new Date();
+  },
+);
 
-    const rootmodel = {
-      author: user._id,
-      content,
-      refpageidx,
-      createdAt: now,
-      updatedAt: now,
-    };
+router.put(
+  "/:id",
+  checkAuth,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const { id } = req.params;
+      const user: User = res.locals.user;
+      const { content, refPageIdx } = req.body;
 
-    const rootComment = new CardModel(rootmodel);
-    const data = await rootComment.save();
-    return res.send(data);
-  } catch (err) {
-    return res.status(404).send(err);
-  }
-});
+      const card = await CardModel.findById(id).populate("author");
+      if (!card) {
+        throw ERROR.NO_CARD;
+      }
 
-router.put("/:id", async (req: express.Request, res: express.Response) => {
-  try {
-    const { id } = req.params;
-    const { token } = req.headers;
-    const { author, content, refpageidx } = req.body;
-    const getcomment = await CardModel.findOne({ _id: id }).populate("author");
+      if (card.author.token !== user.token) {
+        throw ERROR.NO_PERMISSION;
+      }
 
-    if (getcomment != null) {
-      if (getcomment.author.token === token) {
-        const now = new Date();
-        const rootmodel = {
-          author,
-          refpageidx,
+      const updatedCard = await CardModel.findByIdAndUpdate(
+        id,
+        {
           content,
-          updatedAt: now,
-        };
-        const data = await getcomment.update(rootmodel);
-        await getcomment.save();
-        return res.send(data);
+          refPageIdx,
+          updatedAt: new Date(),
+        },
+        { new: true },
+      )
+        .populate(cardPopulateOption)
+        .exec();
+      if (!updatedCard) {
+        throw ERROR.FAILED_TO_UPDATE;
       }
+      return res.send(updatedCard);
+    } catch (err) {
+      return res
+        .status(err.status || 500)
+        .send({ message: err.message || err.toString() });
     }
-  } catch (err) {
-    return res.status(404).send(err);
-  }
-});
+  },
+);
 
-router.delete("/:id", async (req: express.Request, res: express.Response) => {
-  try {
-    const { id } = req.params;
-    const { token } = req.headers;
-    const getcomment = await CardModel.findOne({ _id: id }).populate("author");
-    if (getcomment != null) {
-      if (getcomment.author.token === token) {
-        // await RootCommentModel.remove({ _id: id });
-        await getcomment.remove();
-        return res.send(getcomment);
+router.delete(
+  "/:id",
+  checkAuth,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const { id } = req.params;
+      const user: User = res.locals.user;
+      const card = await CardModel.findById(id).populate("author");
+      if (!card) {
+        throw ERROR.NO_CARD;
       }
-    }
-  } catch (err) {
-    return res.status(404).send(err);
-  }
-});
 
-// router.put("/:id/like", async (req: express.Request, res: express.Response) => {
-//   try {
-//     const { id } = req.params;
-//     const { token } = req.headers;
-//     const user = await UserModel.findOne({ token });
-//     const getcomment = await RootCommentModel.findOne({ _id: id }).populate(
-//       "author",
-//     );
-//     if (getcomment && user) {
-//       getcomment.comments.
-//       getcomment.update({ likes: getcomment.likes.concat(user._id) });
-//     }
-//   } catch (err) {
-//     return res.status(404).send(err);
-//   }
-// });
+      if (card.author.token !== user.token) {
+        throw ERROR.NO_PERMISSION;
+      }
+
+      await RoomModel.findOneAndUpdate(
+        { url: card.roomUrl },
+        {
+          $pull: {
+            cards: card._id,
+          },
+        },
+      );
+      await card.remove();
+
+      return res.send(card);
+    } catch (err) {
+      return res
+        .status(err.status || 500)
+        .send({ message: err.message || err.toString() });
+    }
+  },
+);
 
 export default router;
