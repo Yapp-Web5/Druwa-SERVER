@@ -12,7 +12,7 @@ router.get("/", async (req: express.Request, res: express.Response) => {
     const data = await UserModel.findOne({ token });
     return res.send(data);
   } catch (err) {
-    return res.status(404).send(err);
+    return res.status(404).send({ message: err.toString() });
   }
 });
 

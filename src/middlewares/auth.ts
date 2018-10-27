@@ -1,16 +1,6 @@
 import express from "express";
 import { UserModel } from "../models/UserModel";
-
-const ERROR = {
-  NO_TOKEN: {
-    status: 401,
-    message: "Can not find token in your request.",
-  },
-  INVALID_TOKEN: {
-    status: 404,
-    message: "Invalid user token",
-  },
-};
+import ERROR from "../consts/error";
 
 export async function checkAuth(
   req: express.Request,
