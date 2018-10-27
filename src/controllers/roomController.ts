@@ -2,27 +2,19 @@ import express from "express";
 import { Room, RoomModel } from "../models/RoomModel";
 import { UserModel, User } from "../models/UserModel";
 import { checkAuth } from "../middlewares/auth";
+import ERROR from "../consts/error";
+import { cardPopulateOption } from "./cardController";
 
 const router = express.Router();
 
-const ERROR = {
-  NO_ROOM: { status: 404, message: "Can't find Room" },
-  NO_PERMISSION: {
-    status: 403,
-    message: "Permission denied, you are not admin",
-  },
-  NO_USER: { status: 404, message: "Can't find user to register as admin" },
-  FAILED_TO_REGISTER_AS_ADMIN: {
-    status: 500,
-    message: "Failed to register new admin",
-  },
-};
+export const populateRoomOption = [
+  { path: "admins", select: { username: 1 } },
+  { path: "participants", select: { username: 1 } },
+  { path: "cards", populate: cardPopulateOption },
+];
 
 const populateRoom = async (room: Room) => {
-  const result = await room
-    .populate({ path: "admins", select: { username: 1 } })
-    .populate({ path: "participants", select: { username: 1 } })
-    .execPopulate();
+  const result = await room.populate(populateRoomOption).execPopulate();
   return result;
 };
 
