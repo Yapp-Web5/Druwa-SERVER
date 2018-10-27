@@ -10,12 +10,12 @@ export interface Room extends Document {
   description: string;
   admins: User[];
   isPublic: boolean;
-  password: string | null;
+  password?: string;
   maxParticipants: number;
   participants: User[];
   createdAt: Date;
   pdfPath: string;
-  comments: Comment[];
+  cards: Comment[];
 }
 
 export const RoomSchema = new Schema({
@@ -74,7 +74,12 @@ export const RoomSchema = new Schema({
     default: Date.now,
     index: true,
   },
-  comments: [CardSchema],
+  cards: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "card",
+    },
+  ],
 });
 
 export const RoomModel = model<Room>("room", RoomSchema);
