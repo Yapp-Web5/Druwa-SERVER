@@ -3,7 +3,7 @@ import { User, UserSchema } from "./UserModel";
 import { Card } from "./CardModel";
 
 export interface Comment extends Document {
-  rootComment: Card;
+  parentCard: Card;
   author: User;
   content: string;
   createdAt: Date;
@@ -13,7 +13,7 @@ export interface Comment extends Document {
 export const CommentSchema = new Schema({
   parentCard: {
     type: Schema.Types.ObjectId,
-    ref: "rootComment",
+    ref: "card",
     required: true,
     index: true,
   },
