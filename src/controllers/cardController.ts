@@ -1,12 +1,12 @@
 import express from "express";
 import { ModelPopulateOptions } from "mongoose";
+import { commentPopulationOption } from "./commentController";
 import { Card, CardModel } from "../models/CardModel";
 import { User } from "../models/UserModel";
 import { RoomModel, Room } from "../models/RoomModel";
-import ERROR from "../consts/error";
 import { Comment, CommentModel } from "../models/CommentModel";
 import { checkAuth, checkInRoom, checkOwnCard } from "../middlewares/auth";
-import { commentPopulationOption } from "./commentController";
+import ERROR from "../consts/error";
 
 const router = express.Router();
 
