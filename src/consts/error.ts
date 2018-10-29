@@ -4,8 +4,12 @@ export const ERROR = {
     status: 403,
     message: "Permission denied.",
   },
-  NO_USER: { status: 404, message: "Can't find user to register as admin" },
-  NO_CARD: { status: 404, message: "Can't find card" },
+  NO_USER: { status: 404, message: "Can't find the user to register as admin" },
+  NO_CARD: { status: 404, message: "Can't find the card" },
+  NO_COMMENT: {
+    status: 404,
+    message: "Can't find the comment.",
+  },
   NO_TOKEN: {
     status: 401,
     message: "Can not find token in your request.",
