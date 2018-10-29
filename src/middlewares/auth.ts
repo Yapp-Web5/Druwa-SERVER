@@ -1,12 +1,18 @@
 import express from "express";
-import { UserModel } from "../models/UserModel";
-import ERROR from "../consts/error";
+import { findIndex } from "lodash";
 
-export async function checkAuth(
+import { UserModel, User } from "../models/UserModel";
+import ERROR from "../consts/error";
+import { RoomModel, Room } from "../models/RoomModel";
+import { populateRoomOption } from "../controllers/roomController";
+import { cardPopulateOption } from "../controllers/cardController";
+import { CardModel } from "../models/CardModel";
+
+export const checkAuth = async (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction,
-) {
+) => {
   try {
     const token = req.headers.token;
     if (!token) {
@@ -23,4 +29,78 @@ export async function checkAuth(
       .status(err.status || 500)
       .send({ message: err.message || err.toString() });
   }
-}
+};
+
+export const checkInRoom = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction,
+) => {
+  try {
+    const { roomUrl } = req.params;
+    const room = await RoomModel.findOne({ url: roomUrl })
+      .populate([
+        { path: "admins", select: { username: 1 } },
+        { path: "participants", select: { username: 1 } },
+        { path: "cards", populate: cardPopulateOption },
+      ])
+      .exec();
+    if (!room) {
+      throw ERROR.NO_ROOM;
+    }
+    const user: User = res.locals.user;
+    if (!user) {
+      throw ERROR.INVALID_TOKEN;
+    }
+    const inRoom =
+      findIndex(room.participants, participant => {
+        return participant._id.equals(user._id);
+      }) !== -1;
+    if (!inRoom) {
+      throw ERROR.NO_PERMISSION;
+    }
+
+    res.locals.room = room;
+    return next();
+  } catch (err) {
+    return res
+      .status(err.status || 500)
+      .send({ message: err.message || err.toString() });
+  }
+};
+
+export const checkOwnCard = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction,
+) => {
+  try {
+    const { id } = req.params;
+    const user: User = res.locals.user;
+    const room: Room = res.locals.room;
+
+    const cardInRoom =
+      findIndex(room.cards, item => {
+        return item._id.equals(id);
+      }) !== -1;
+
+    if (!cardInRoom) {
+      throw ERROR.NO_CARD;
+    }
+
+    const card = await CardModel.findById(id).populate(cardPopulateOption);
+    if (!card) {
+      throw ERROR.NO_CARD;
+    }
+    const isMine = card.author._id.equals(user._id);
+    if (!isMine) {
+      throw ERROR.NO_PERMISSION;
+    }
+    res.locals.card = card;
+    next();
+  } catch (err) {
+    return res
+      .status(err.status || 500)
+      .send({ message: err.message || err.toString() });
+  }
+};
