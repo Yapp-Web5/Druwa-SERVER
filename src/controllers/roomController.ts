@@ -1,22 +1,18 @@
 import express from "express";
+import { ModelPopulateOptions } from "mongoose";
+import { cardPopulateOption } from "./cardController";
 import { Room, RoomModel } from "../models/RoomModel";
 import { UserModel, User } from "../models/UserModel";
 import { checkAuth } from "../middlewares/auth";
 import ERROR from "../consts/error";
-import { cardPopulateOption } from "./cardController";
 
 const router = express.Router();
 
-export const populateRoomOption = [
+export const populateRoomOption: ModelPopulateOptions[] = [
   { path: "admins", select: { username: 1 } },
   { path: "participants", select: { username: 1 } },
   { path: "cards", populate: cardPopulateOption },
 ];
-
-const populateRoom = async (room: Room) => {
-  const result = await room.populate(populateRoomOption).execPopulate();
-  return result;
-};
 
 const ownRoom = (room: Room, user: User) => {
   return room.admins.indexOf(user._id) !== -1;
@@ -43,12 +39,11 @@ router.post(
         createdAt: new Date(),
         pdfPath: pdfPath as string,
       } as Partial<Room>;
-      const room = new RoomModel(roomObject);
-      const result = await room.save();
-      await user.update({ $addToSet: { enteredRoom: result._id } }).exec();
+      const room = new RoomModel(roomObject).populate(populateRoomOption);
+      await room.save();
+      await user.update({ $addToSet: { enteredRoom: room._id } }).exec();
       await user.save();
-      const populatedRoom = await populateRoom(result);
-      return res.send(populatedRoom);
+      return res.send(room);
     } catch (err) {
       return res
         .status(err.status || 500)
@@ -63,12 +58,13 @@ router.get(
   async (req: express.Request, res: express.Response) => {
     try {
       const { url } = req.params;
-      const room = await RoomModel.findOne({ url });
+      const room = await RoomModel.findOne({ url }).populate(
+        populateRoomOption,
+      );
       if (!room) {
         throw ERROR.NO_ROOM;
       }
-      const populatedRoom = await populateRoom(room);
-      return res.send(populatedRoom);
+      return res.send(room);
     } catch (err) {
       return res
         .status(err.status || 500)
@@ -88,10 +84,13 @@ router.put(
         { url },
         { $addToSet: { participants: user._id } },
         { new: true },
-      ).exec();
+      )
+        .populate(populateRoomOption)
+        .exec();
       if (!room) {
         throw ERROR.NO_ROOM;
       }
+      await room.save();
       await user
         .update({
           $addToSet: {
@@ -100,8 +99,7 @@ router.put(
         })
         .exec();
       await user.save();
-      const populatedRoom = await populateRoom(room);
-      return res.send(populatedRoom);
+      return res.send(room);
     } catch (err) {
       return res
         .status(err.status || 500)
@@ -138,15 +136,15 @@ router.put(
           },
         },
         { new: true },
-      ).exec();
+      )
+        .populate(populateRoomOption)
+        .exec();
 
       if (!updatedRoom) {
         throw ERROR.FAILED_TO_REGISTER_AS_ADMIN;
       }
-
-      const populatedRoom = await populateRoom(updatedRoom);
-
-      return res.send(populatedRoom);
+      await updatedRoom.save();
+      return res.send(updatedRoom);
     } catch (err) {
       return res
         .status(err.status || 500)
@@ -162,7 +160,9 @@ router.delete(
     try {
       const user: User = res.locals.user;
       const { url } = req.params;
-      const room = await RoomModel.findOne({ url });
+      const room = await RoomModel.findOne({ url }).populate(
+        populateRoomOption,
+      );
       if (!room) {
         throw ERROR.NO_ROOM;
       }
