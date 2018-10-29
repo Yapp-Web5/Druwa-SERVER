@@ -10,6 +10,7 @@ export interface Card extends Document {
   comments: Comment[];
   createdAt: Date;
   updatedAt: Date;
+  isAdmin: boolean;
   refPageIdx?: number;
 }
 
@@ -50,6 +51,10 @@ export const CardSchema = new Schema({
   updatedAt: {
     index: true,
     type: Date,
+  },
+  isAdmin: {
+    index: true,
+    type: Boolean,
   },
   refPageIdx: {
     type: Number,

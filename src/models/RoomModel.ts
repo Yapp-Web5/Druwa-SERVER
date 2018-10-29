@@ -9,12 +9,12 @@ export interface Room extends Document {
   description: string;
   admins: User[];
   isPublic: boolean;
-  password?: string;
   maxParticipants: number;
   participants: User[];
   createdAt: Date;
   pdfPath: string;
   cards: Card[];
+  password?: string;
 }
 
 export const RoomSchema = new Schema({

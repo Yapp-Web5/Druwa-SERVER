@@ -5,9 +5,9 @@ export interface User extends Document {
   token: string;
   username: string;
   createdAt: Date;
+  enteredRoom: Room[];
   email?: string;
   password?: string;
-  enteredRoom: Room[];
 }
 
 export const UserSchema = new Schema({
