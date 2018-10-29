@@ -1,5 +1,5 @@
 import { Schema, Document, model } from "mongoose";
-import { User, UserSchema } from "./UserModel";
+import { User } from "./UserModel";
 import { Card } from "./CardModel";
 
 export interface Comment extends Document {
