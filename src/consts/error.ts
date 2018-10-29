@@ -1,5 +1,5 @@
 export const ERROR = {
-  NO_ROOM: { status: 404, message: "Can't find Room" },
+  NO_ROOM: { status: 404, message: "The url of room is invalid." },
   NO_PERMISSION: {
     status: 403,
     message: "Permission denied.",
