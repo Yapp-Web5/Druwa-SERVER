@@ -1,8 +1,6 @@
-import { UserSchema, User } from "./UserModel";
-import { Like, LikeSchema } from "./LikeModel";
-import { Schema, Document, model, Mongoose } from "mongoose";
-import { CommentSchema, Comment } from "./CommentModel";
-import { Room } from "./RoomModel";
+import { User } from "./UserModel";
+import { Schema, Document, model } from "mongoose";
+import { Comment } from "./CommentModel";
 
 export interface Card extends Document {
   author: User;
