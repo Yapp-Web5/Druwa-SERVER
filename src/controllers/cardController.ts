@@ -122,7 +122,7 @@ router.delete(
             cards: card._id,
           },
         },
-      );
+      ).exec();
       await card.remove();
       return res.send(card);
     } catch (err) {
