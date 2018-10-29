@@ -1,12 +1,8 @@
 import express from "express";
 import { ModelPopulateOptions } from "mongoose";
-import * as _ from "lodash";
 import { Comment, CommentModel } from "../models/CommentModel";
 import { Card, CardModel } from "../models/CardModel";
-import { User, UserModel } from "../models/UserModel";
-import { CursorCommentOptions } from "mongodb";
 import { checkAuth, checkInRoom, checkOwnComment } from "../middlewares/auth";
-
 import ERROR from "../consts/error";
 
 const router = express.Router();

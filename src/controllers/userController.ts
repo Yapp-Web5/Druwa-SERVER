@@ -1,8 +1,7 @@
 import express from "express";
 import * as crypto from "crypto-js";
-import { User, UserModel } from "../models/UserModel";
+import { UserModel } from "../models/UserModel";
 import { generateNickname } from "../consts/nickname";
-import { Room } from "../models/RoomModel";
 
 const router = express.Router();
 
