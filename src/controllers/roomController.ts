@@ -1,4 +1,5 @@
 import express from "express";
+import { findIndex } from "lodash";
 import { ModelPopulateOptions } from "mongoose";
 import { cardPopulateOption } from "./cardController";
 import { Room, RoomModel } from "../models/RoomModel";
@@ -15,7 +16,11 @@ export const populateRoomOption: ModelPopulateOptions[] = [
 ];
 
 const ownRoom = (room: Room, user: User) => {
-  return room.admins.indexOf(user._id) !== -1;
+  return (
+    findIndex(room.admins, admin => {
+      return admin._id.equals(user._id);
+    }) !== -1
+  );
 };
 
 router.post(
