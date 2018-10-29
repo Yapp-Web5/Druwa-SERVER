@@ -11,7 +11,7 @@ import uploadController from "./controllers/uploadController";
 const router = express.Router();
 
 router.use("/cards", cardController);
-router.use("/comment", commentController);
+router.use("/comments", commentController);
 router.use("/rooms", roomController);
 router.use("/users", userController);
 router.use("/test", testController);
