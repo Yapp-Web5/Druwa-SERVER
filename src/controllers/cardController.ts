@@ -6,18 +6,14 @@ import { RoomModel, Room } from "../models/RoomModel";
 import ERROR from "../consts/error";
 import { Comment, CommentModel } from "../models/CommentModel";
 import { checkAuth, checkInRoom, checkOwnCard } from "../middlewares/auth";
+import { commentPopulationOption } from "./commentController";
 
 const router = express.Router();
 
 export const cardPopulateOption: ModelPopulateOptions[] = [
   { path: "author", select: { username: 1 } },
-  { path: "comments", select: { username: 1 } },
+  { path: "comments", populate: commentPopulationOption },
   { path: "likes", select: { username: 1 } },
-];
-
-export const commentPopulationOption: ModelPopulateOptions[] = [
-  { path: "parentCard", populate: cardPopulateOption },
-  { path: "author", select: { username: 1 } },
 ];
 
 router.get(
@@ -226,7 +222,7 @@ router.post(
 
       const now = new Date();
       const commentObject = {
-        parentCard: user._id,
+        parentCard: id,
         author: user._id,
         content,
         createdAt: now,
@@ -234,6 +230,7 @@ router.post(
       } as Partial<Comment>;
 
       const comment = new CommentModel(commentObject);
+      await comment.save();
 
       const updatedCard = await CardModel.findByIdAndUpdate(
         id,

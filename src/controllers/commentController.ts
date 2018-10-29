@@ -1,109 +1,90 @@
 import express from "express";
+import { ModelPopulateOptions } from "mongoose";
 import * as _ from "lodash";
 import { Comment, CommentModel } from "../models/CommentModel";
 import { Card, CardModel } from "../models/CardModel";
 import { User, UserModel } from "../models/UserModel";
 import { CursorCommentOptions } from "mongodb";
-import { checkAuth } from "../middlewares/auth";
+import { checkAuth, checkInRoom, checkOwnComment } from "../middlewares/auth";
+
+import ERROR from "../consts/error";
 
 const router = express.Router();
 
-// find
+export const commentPopulationOption: ModelPopulateOptions[] = [
+  { path: "author", select: { username: 1 } },
+];
+
 router.get(
-  "/:id",
+  "/:roomUrl/:id",
   checkAuth,
+  checkInRoom,
   async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
-      const data = await CommentModel.findOne({
-        _id: id,
-      }).populate(["rootComment", "author"]);
-      return res.send(data);
+      const comment = await CommentModel.findById(id).populate(
+        commentPopulationOption,
+      );
+      return res.send(comment);
     } catch (err) {
       return res.status(404).send(err);
     }
   },
 );
 
-// save
-router.post("/", async (req: express.Request, res: express.Response) => {
-  try {
-    const now = new Date();
-    const { token } = req.headers;
-    const { rootcomment_id, content } = req.body;
-    const rootComment = await CardModel.findOne({
-      _id: rootcomment_id,
-    });
-    const user = await UserModel.findOne({ token });
-    if (rootComment && user) {
-      const commentObject = {
-        rootComment: rootComment._id,
-        author: user._id,
-        content: content as string,
-        createdAt: now,
-        updatedAt: now,
-      } as Partial<Comment>;
-
-      const comment = new CommentModel(commentObject);
-      const result = await comment.save();
-      await rootComment.update({
-        comments: rootComment.comments.concat(comment),
-      });
-      await rootComment.save();
-      return res.send(result);
-    } else {
-      return res.send("failed");
-    }
-  } catch (err) {
-    return res.status(500).send(err);
-  }
-});
-
 // update
-router.put("/:id", async (req: express.Request, res: express.Response) => {
-  try {
-    const { token } = req.headers;
-    const { id } = req.params;
-    const { content } = req.body;
+router.put(
+  "/:roomUrl/:id",
+  checkAuth,
+  checkInRoom,
+  checkOwnComment,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const { content } = req.body;
+      const comment: Comment = res.locals.comment;
 
-    const comment = await CommentModel.findOne({ _id: id });
-    const user = await UserModel.findOne({ token });
-
-    if (comment && user) {
-      if (comment.author.token !== token) {
-        throw new Error("The user is not author of this comment");
+      const updatedComment = await CommentModel.findByIdAndUpdate(
+        comment._id,
+        {
+          content,
+        },
+        { new: true },
+      )
+        .populate(commentPopulationOption)
+        .exec();
+      if (!updatedComment) {
+        throw ERROR.FAILED_TO_UPDATE;
       }
-
-      const result = await comment.update({ content });
-      return res.send(result);
+      return res.send(updatedComment);
+    } catch (err) {
+      return res.status(500).send(err);
     }
-    throw new Error("Failed to find comment or user");
-  } catch (err) {
-    return res.status(500).send(err);
-  }
-});
+  },
+);
 
 // delete
-router.delete("/:id", async (req: express.Request, res: express.Response) => {
-  try {
-    const { id } = req.params;
-    const { token } = req.headers;
+router.delete(
+  "/:roomUrl/:id",
+  checkAuth,
+  checkInRoom,
+  checkOwnComment,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const card: Card = res.locals.card;
+      const comment: Comment = res.locals.comment;
 
-    const user = await UserModel.findOne({ token });
-    const comment = await CommentModel.findOne({ _id: id });
+      await CardModel.findByIdAndUpdate(card._id, {
+        $pull: {
+          comments: comment._id,
+        },
+      }).exec();
 
-    if (user && comment) {
-      if (user.token !== token) {
-        throw new Error("The use is not author of this comment");
-      }
-
-      const result = await comment.remove();
-      return res.send(result);
+      await comment.remove();
+      return res.send(comment);
+    } catch (err) {
+      return res.status(500).send(err);
     }
-    throw new Error("Failed to find comment or user");
-  } catch (err) {
-    return res.status(500).send(err);
-  }
-});
+  },
+);
 
 export default router;
