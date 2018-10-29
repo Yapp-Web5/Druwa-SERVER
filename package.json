@@ -37,6 +37,8 @@
     "@types/node": "^10.5.1",
     "@types/socket.io": "^1.4.36",
     "nodemon": "^1.18.3",
+    "swagger-jsdoc": "^3.2.3",
+    "swagger-ui-express": "^4.0.1",
     "ts-node": "^7.0.0",
     "tslint": "^5.11.0",
     "tslint-config-prettier": "^1.14.0",
