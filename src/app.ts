@@ -3,13 +3,15 @@ import cors from "cors";
 import session from "express-session";
 import sessionConfig from "./configs/session";
 import logger from "morgan";
-import * as bodyParser from "body-parser";
-import api from "./api";
-import * as socketIO from "socket.io";
 import mongoose from "mongoose";
+import * as bodyParser from "body-parser";
+import * as socketIO from "socket.io";
+
+import api from "./api";
+import swagger from "./swagger";
+
 import { DB_END_POINT } from "./configs/db";
 import { generateNickname } from "./consts/nickname";
-import * as crypto from "crypto-js";
 import { RoomModel } from "./models/RoomModel";
 import { UserModel } from "./models/UserModel";
 
@@ -25,6 +27,7 @@ app.use(session(sessionConfig));
 app.use(cors());
 
 app.use("/api", api);
+app.use("/docs", swagger);
 
 mongoose.connect(
   DB_END_POINT,
