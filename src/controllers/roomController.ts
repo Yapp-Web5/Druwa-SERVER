@@ -23,6 +23,75 @@ const ownRoom = (room: Room, user: User) => {
   );
 };
 
+/**
+ * @swagger
+ * definitions:
+ *   Room:
+ *     type: object
+ *     required:
+ *       - url
+ *       - lecturer
+ *       - title
+ *       - description
+ *       - admins
+ *       - isPublic
+ *       - maxParticipants
+ *       - participants
+ *       - createdAt
+ *       - pdfPath
+ *       - cards
+ *     properties:
+ *       url:
+ *         type: string
+ *       lecturer:
+ *         type: stromg
+ *       title:
+ *         type: string
+ *       description:
+ *         type: string
+ *       admins:
+ *         type: User[]
+ *       isPublic:
+ *         type: boolean
+ *       maxParticipants:
+ *         type: number
+ *       participants:
+ *         type: User[]
+ *       createdAt:
+ *         type: Date
+ *       pdfPath:
+ *         type: url
+ *       cards:
+ *         type: Card[]
+ *       password:
+ *         type: string
+ */
+
+/**
+ * @swagger
+ * /rooms:
+ *   post:
+ *     tags:
+ *       - "create Room"
+ *     description: Create the new Room
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *        - in: "header"
+ *          name: "token"
+ *          description: "The token for authentication"
+ *          type: "String"
+ *          required: true
+ *        - in: "body"
+ *          name: "lecturer"
+ *          description: "The name of lecturer"
+ *          type: "String"
+ *          required: true
+ *     responses:
+ *       200:
+ *         description: Success to create the new Room
+ */
+
 router.post(
   "/",
   checkAuth,

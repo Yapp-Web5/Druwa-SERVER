@@ -2,6 +2,50 @@ import { Schema, Document, model } from "mongoose";
 import { User } from "./UserModel";
 import { Card } from "./CardModel";
 
+/**
+ * @swagger
+ * definitions:
+ *   Room:
+ *     type: object
+ *     required:
+ *       - url
+ *       - lecturer
+ *       - title
+ *       - description
+ *       - admins
+ *       - isPublic
+ *       - maxParticipants
+ *       - participants
+ *       - createdAt
+ *       - pdfPath
+ *       - cards
+ *     properties:
+ *       url:
+ *         type: string
+ *       lecturer:
+ *         type: stromg
+ *       title:
+ *         type: string
+ *       description:
+ *         type: string
+ *       admins:
+ *         type: User[]
+ *       isPublic:
+ *         type: boolean
+ *       maxParticipants:
+ *         type: number
+ *       participants:
+ *         type: User[]
+ *       createdAt:
+ *         type: Date
+ *       pdfPath:
+ *         type: url
+ *       cards:
+ *         type: Card[]
+ *       password:
+ *         type: string
+ */
+
 export interface Room extends Document {
   url: string;
   lecturer: string;

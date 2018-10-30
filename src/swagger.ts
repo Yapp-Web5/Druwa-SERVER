@@ -17,16 +17,13 @@ const swaggerDefinition = {
   basePath: "/",
 };
 
-// Options for the swagger docs
 const options = {
-  // Import swaggerDefinitions
   swaggerDefinition,
-  // Path to the API docs
-  apis: ["./controllers/*.ts"],
+  apis: ["./controllers/*", "./models/*"],
 };
 
 const swaggerSpec = swaggerJSDoc(options);
-router.use("/", swaggerUI.serve);
-router.get("/", swaggerUI.setup(swaggerSpec));
+router.use("/", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
+// router.get("/", swaggerUI.setup(swaggerSpec));
 
 export default router;
