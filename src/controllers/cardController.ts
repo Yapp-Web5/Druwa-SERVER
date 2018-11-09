@@ -45,6 +45,7 @@ router.post(
       const { content, refPageIdx } = req.body;
       const room: Room = res.locals.room;
       const user: User = res.locals.user;
+      const isAdmin = room.admins.some(admin => admin._id.equals(user._id));
       const now = new Date();
       const cardObject = {
         author: user._id,
@@ -53,6 +54,7 @@ router.post(
         createdAt: now,
         updatedAt: now,
         refPageIdx,
+        isAdmin,
       } as Partial<Card>;
 
       const card = new CardModel(cardObject).populate(cardPopulateOption);
