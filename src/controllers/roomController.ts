@@ -1,6 +1,7 @@
 import express from "express";
 import { findIndex } from "lodash";
 import { ModelPopulateOptions } from "mongoose";
+import { SHA256 } from "crypto-js";
 import { cardPopulateOption } from "./cardController";
 import { Room, RoomModel } from "../models/RoomModel";
 import { UserModel, User } from "../models/UserModel";
@@ -29,10 +30,12 @@ router.post(
   async (req: express.Request, res: express.Response) => {
     try {
       const user: User = res.locals.user;
-      const { lecturer, url, title, description, password, pdfPath } = req.body;
+      const { lecturer, title, description, password, pdfPath } = req.body;
       const roomObject = {
         lecturer: lecturer as string,
-        url: url as string,
+        url: SHA256(new Date().toString())
+          .toString()
+          .slice(0, 10),
         title: title as string,
         description: description as string,
         admins: [user._id],
