@@ -9,9 +9,10 @@ import * as socketIO from "socket.io";
 import mongoose from "mongoose";
 import { DB_END_POINT } from "./configs/db";
 import { generateNickname } from "./consts/nickname";
-import * as crypto from "crypto-js";
 import { RoomModel } from "./models/RoomModel";
 import { UserModel } from "./models/UserModel";
+import { populateRoomOption } from "./controllers/roomController";
+import ERROR from "./consts/error";
 
 const timezone = "UTC";
 process.env.TZ = timezone;
@@ -42,49 +43,49 @@ const server = app.listen(8080, () => {
 const io = socketIO.listen(server);
 io.on("connection", async (socket: socketIO.Socket) => {
   try {
-    console.log("a user connected");
     const query = socket.handshake.query;
+    const { type } = query;
+    if (type === "enter") {
+      const { token, roomUrl } = query;
+      if (token && roomUrl) {
+        const user = await UserModel.findOne({ token });
+        if (user) {
+          const room = await RoomModel.findOneAndUpdate(
+            { url: roomUrl },
+            { $push: { participants: user._id } },
+            { new: true },
+          )
+            .populate(populateRoomOption)
+            .exec();
+          if (!room) {
+            throw ERROR.NO_ROOM;
+          }
+          io.sockets.emit("newEnter", { room });
+        }
+      }
+    }
+
     socket.on("disconnect", async () => {
       console.log("disconnect");
       if (query.token && query.roomUrl) {
         const { token, roomUrl } = query;
         const user = await UserModel.findOne({ token });
         if (user) {
-          await RoomModel.update(
+          const room = await RoomModel.findOneAndUpdate(
             { url: roomUrl },
             { $pull: { participants: user._id } },
-          );
-          const room = await RoomModel.findOne({ url: roomUrl });
-          if (room) {
-            socket.broadcast.emit("newEnter", { room });
+            { new: true },
+          )
+            .populate(populateRoomOption)
+            .exec();
+          if (!room) {
+            throw ERROR.NO_ROOM;
           }
-          return socket.send({ room });
+          io.sockets.emit("newEnter", { room });
         }
       }
     });
-
-    if (query.token && query.roomUrl) {
-      const { token, roomUrl } = query;
-      const user = await UserModel.findOne({ token });
-      if (user) {
-        await RoomModel.update(
-          { url: roomUrl },
-          { $push: { participants: user._id } },
-        );
-        const room = await RoomModel.findOne({ url: roomUrl });
-        if (room) {
-          socket.broadcast.emit("newEnter", { room });
-        }
-        return socket.send({ room });
-      }
-
-      // console.log("generate token");
-      // const token = crypto.SHA256(new Date().toString()).toString();
-      // socket.send({
-      //   token,
-      // });
-    }
   } catch (err) {
-    return socket.disconnect();
+    socket.disconnect();
   }
 });
