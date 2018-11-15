@@ -9,10 +9,7 @@ import * as socketIO from "socket.io";
 import mongoose from "mongoose";
 import { DB_END_POINT } from "./configs/db";
 import { generateNickname } from "./consts/nickname";
-import { RoomModel } from "./models/RoomModel";
-import { UserModel } from "./models/UserModel";
-import { populateRoomOption } from "./controllers/roomController";
-import ERROR from "./consts/error";
+import { connetEvent, disconnectEvent } from "./sockets/roomSocket";
 
 const timezone = "UTC";
 process.env.TZ = timezone;
@@ -36,54 +33,16 @@ mongoose.connect(
 
 console.log("Success to connect with DB");
 console.log(generateNickname());
-const server = app.listen(8080, () => {
+export const server = app.listen(8080, () => {
   console.log("Example app listening on port 8080!");
 });
 
-const io = socketIO.listen(server);
+export const io = socketIO.listen(server);
 io.on("connection", async (socket: socketIO.Socket) => {
   try {
-    const query = socket.handshake.query;
-    const { type } = query;
-    if (type === "enter") {
-      const { token, roomUrl } = query;
-      if (token && roomUrl) {
-        const user = await UserModel.findOne({ token });
-        if (user) {
-          const room = await RoomModel.findOneAndUpdate(
-            { url: roomUrl },
-            { $push: { participants: user._id } },
-            { new: true },
-          )
-            .populate(populateRoomOption)
-            .exec();
-          if (!room) {
-            throw ERROR.NO_ROOM;
-          }
-          io.sockets.emit("enter", { room });
-        }
-      }
-    }
-
+    await connetEvent(socket);
     socket.on("disconnect", async () => {
-      console.log("disconnect");
-      if (query.token && query.roomUrl) {
-        const { token, roomUrl } = query;
-        const user = await UserModel.findOne({ token });
-        if (user) {
-          const room = await RoomModel.findOneAndUpdate(
-            { url: roomUrl },
-            { $pull: { participants: user._id } },
-            { new: true },
-          )
-            .populate(populateRoomOption)
-            .exec();
-          if (!room) {
-            throw ERROR.NO_ROOM;
-          }
-          io.sockets.emit("leave", { room });
-        }
-      }
+      await disconnectEvent(socket);
     });
   } catch (err) {
     socket.disconnect();
