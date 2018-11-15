@@ -60,7 +60,7 @@ io.on("connection", async (socket: socketIO.Socket) => {
           if (!room) {
             throw ERROR.NO_ROOM;
           }
-          io.sockets.emit("newEnter", { room });
+          io.sockets.emit("enter", { room });
         }
       }
     }
@@ -81,7 +81,7 @@ io.on("connection", async (socket: socketIO.Socket) => {
           if (!room) {
             throw ERROR.NO_ROOM;
           }
-          io.sockets.emit("newEnter", { room });
+          io.sockets.emit("leave", { room });
         }
       }
     });
