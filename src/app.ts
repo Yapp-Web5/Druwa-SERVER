@@ -32,7 +32,6 @@ mongoose.connect(
 );
 
 console.log("Success to connect with DB");
-console.log(generateNickname());
 export const server = app.listen(8080, () => {
   console.log("Example app listening on port 8080!");
 });
