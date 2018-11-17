@@ -39,7 +39,7 @@ router.post(
         title: title as string,
         description: description as string,
         admins: [user._id],
-        participants: [user._id],
+        participants: [],
         comments: [],
         isPublic: !password,
         password,
