@@ -7,6 +7,7 @@ import { RoomModel, Room } from "../models/RoomModel";
 import { Comment, CommentModel } from "../models/CommentModel";
 import { checkAuth, checkInRoom, checkOwnCard } from "../middlewares/auth";
 import ERROR from "../consts/error";
+import { io } from "../app";
 
 const router = express.Router();
 
@@ -67,6 +68,7 @@ router.post(
           },
         })
         .exec();
+      io.sockets.to(roomUrl).emit("newCard", { card });
       await room.save();
       return res.send(data);
     } catch (err) {

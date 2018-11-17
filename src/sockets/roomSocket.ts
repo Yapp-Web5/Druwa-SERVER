@@ -24,7 +24,8 @@ export const connetEvent = async (socket: socketIO.Socket) => {
         if (!room) {
           throw ERROR.NO_ROOM;
         }
-        io.sockets.emit("enter", { room });
+        socket.join(roomUrl);
+        io.to(roomUrl).emit("enter", { room });
       }
     }
   }
@@ -47,7 +48,8 @@ export const disconnectEvent = async (socket: socketIO.Socket) => {
       if (!room) {
         throw ERROR.NO_ROOM;
       }
-      socket.broadcast.emit("leave", { room });
+      socket.leave(roomUrl);
+      io.to(roomUrl).emit("leave", { room });
     }
   }
 };

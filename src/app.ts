@@ -41,6 +41,7 @@ export const io = socketIO.listen(server);
 io.on("connection", async (socket: socketIO.Socket) => {
   try {
     await connetEvent(socket);
+    socket.on("createCard", async () => {});
     socket.on("disconnect", async () => {
       await disconnectEvent(socket);
     });
