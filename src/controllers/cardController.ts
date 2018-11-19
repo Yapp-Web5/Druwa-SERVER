@@ -24,7 +24,7 @@ router.get(
   async (req: express.Request, res: express.Response, next: any) => {
     try {
       const { roomUrl } = req.params;
-      const cards = await CardModel.find({ url: roomUrl }).populate(
+      const cards = await CardModel.find({ roomUrl }).populate(
         cardPopulateOption,
       );
       return res.send(cards);
