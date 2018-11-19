@@ -58,7 +58,9 @@ router.post(
         isAdmin,
       } as Partial<Card>;
 
-      const card = new CardModel(cardObject).populate(cardPopulateOption);
+      const card = await new CardModel(cardObject)
+        .populate(cardPopulateOption)
+        .execPopulate();
       const data = await card.save();
 
       await room
