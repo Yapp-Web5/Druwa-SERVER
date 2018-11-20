@@ -145,7 +145,7 @@ router.put(
   checkInRoom,
   async (req: express.Request, res: express.Response) => {
     try {
-      const { id } = req.params;
+      const { roomUrl, id } = req.params;
       const user: User = res.locals.user;
       const card = await CardModel.findById(id).populate("author");
       if (!card) {
@@ -166,6 +166,7 @@ router.put(
       if (!updatedCard) {
         throw ERROR.FAILED_TO_UPDATE;
       }
+      io.sockets.to(roomUrl).emit("newCard", { card: updatedCard });
       return res.send(updatedCard);
     } catch (err) {
       return res
@@ -181,7 +182,7 @@ router.put(
   checkInRoom,
   async (req: express.Request, res: express.Response) => {
     try {
-      const { id } = req.params;
+      const { roomUrl, id } = req.params;
       const user: User = res.locals.user;
       const card = await CardModel.findById(id).populate("author");
       if (!card) {
@@ -202,6 +203,7 @@ router.put(
       if (!updatedCard) {
         throw ERROR.FAILED_TO_UPDATE;
       }
+      io.sockets.to(roomUrl).emit("newCard", { card: updatedCard });
       return res.send(updatedCard);
     } catch (err) {
       return res
