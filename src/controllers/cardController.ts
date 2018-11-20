@@ -120,6 +120,7 @@ router.delete(
   checkOwnCard,
   async (req: express.Request, res: express.Response) => {
     try {
+      const { roomUrl } = req.params;
       const card: Card = res.locals.card;
       await RoomModel.findOneAndUpdate(
         { url: card.roomUrl },
@@ -129,6 +130,7 @@ router.delete(
           },
         },
       ).exec();
+      io.sockets.to(roomUrl).emit("removeCard", { card });
       await card.remove();
       return res.send(card);
     } catch (err) {
