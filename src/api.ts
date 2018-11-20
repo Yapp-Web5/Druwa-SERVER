@@ -12,6 +12,6 @@ router.use("/cards", cardController);
 router.use("/comments", commentController);
 router.use("/rooms", roomController);
 router.use("/users", userController);
-router.use("/files", uploadController);
+router.use("/upload", uploadController);
 
 export default router;
