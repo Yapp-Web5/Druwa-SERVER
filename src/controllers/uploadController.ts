@@ -11,6 +11,7 @@ AWS.config.loadFromPath(__dirname + "/../configs/awsconfig.json");
 const S3 = new AWS.S3();
 const router = express.Router();
 const bucketName = 'uploaddruwa';
+const url = "https://s3.ap-northeast-2.amazonaws.com/uploaddruwa/";
 router.use(bodyParser.json({ limit: "50mb" }));
 
 //file이름 정책
@@ -30,35 +31,18 @@ export const upload = multer({
 
 router.post("/", upload.single('uploadfile'), async (req: express.Request, res: express.Response) => {
   try {
-    //const form = new formidable.IncomingForm();
-    // const data = await form.parse();
-    // const { userfile } = req.body;
-    // const s3 = new AWS.S3();
-    // //const data = fs.createReadStream(userfile.files); 
-    // const data = fs.readFileSync(userfile.files);
-    // const params = {
-    //   Bucket: bucketName,
-    //   Key: userfile.files, //+ '_' + new Date().toString(),
-    //   ACL: "public-read",
-    //   Body: data,
-    //   contentType: multerS3.AUTO_CONTENT_TYPE,
-    // };
-    // const getdata = await s3.upload(params);
-    // console.log(data.Location);
-    //room db pdf path 저장?
-    //room url 알려줘야한다.
-    //console.log(req.file);
     console.log("uploadfile success : " + req.file.originalname);
     var params = { Bucket: bucketName, Key: req.file.originalname };
-    const result = await S3.getSignedUrl('getObject', params);
+    //<promise type error>
+    //const result = await S3.getSignedUrl('getObject', params);
     //console.log(result);
+    const result = url + req.file.originalname;
     return res.status(200).send(result);
   } catch (err) {
     console.log(err);
     return res.status(404).send(err);
   }
 });
-
 
 router.get('/url/:filename', async (req: express.Request, res: express.Response) => {
   try {
