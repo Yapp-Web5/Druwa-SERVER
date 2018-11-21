@@ -51,10 +51,6 @@ export const RoomSchema = new Schema({
     required: true,
     index: true,
   },
-  password: {
-    type: String,
-    index: true,
-  },
   maxParticipants: {
     type: Number,
     required: true,
@@ -73,12 +69,22 @@ export const RoomSchema = new Schema({
     default: Date.now,
     index: true,
   },
+  pdfPath: {
+    type: String,
+    required: false,
+    unique: true,
+    index: true,
+  },
   cards: [
     {
       type: Schema.Types.ObjectId,
       ref: "card",
     },
   ],
+  password: {
+    type: String,
+    index: true,
+  },
 });
 
 export const RoomModel = model<Room>("room", RoomSchema);
