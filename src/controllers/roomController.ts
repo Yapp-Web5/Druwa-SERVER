@@ -5,7 +5,7 @@ import { SHA256 } from "crypto-js";
 import { cardPopulateOption } from "./cardController";
 import { Room, RoomModel } from "../models/RoomModel";
 import { UserModel, User } from "../models/UserModel";
-import { checkAuth } from "../middlewares/auth";
+import { checkAuth, checkInRoom } from "../middlewares/auth";
 import ERROR from "../consts/error";
 
 const router = express.Router();
@@ -157,6 +157,41 @@ router.put(
       return res
         .status(err.status || 500)
         .send({ message: err.message || err.toString() });
+    }
+  },
+);
+
+router.put(
+  "/:roomUrl",
+  checkAuth,
+  checkInRoom,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const user: User = res.locals.user;
+      const room: Room = res.locals.room;
+      const { title, lecturer, password } = req.body;
+      if (!ownRoom(room, user)) {
+        throw ERROR.NO_PERMISSION;
+      }
+      const updatedRoom = await room
+        .update(
+          {
+            title: title || room.title,
+            lecturer: lecturer || room.lecturer,
+            password: password || room.password,
+          },
+          { new: true },
+        )
+        .populate(populateRoomOption)
+        .exec();
+
+      if (!updatedRoom) {
+        throw ERROR.FAILED_TO_REGISTER_AS_ADMIN;
+      }
+      await updatedRoom.save();
+      return res.send(updatedRoom);
+    } catch (err) {
+      return res.status(404).send(err);
     }
   },
 );
