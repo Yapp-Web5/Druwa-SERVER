@@ -21,7 +21,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(session(sessionConfig));
 app.use(cors());
-
+app.use("/uploads", express.static("uploads"));
 app.use("/api", api);
 
 mongoose.connect(

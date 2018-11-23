@@ -46,17 +46,21 @@ export const checkInRoom = async (
         { path: "cards", populate: cardPopulateOption },
       ])
       .exec();
+
     if (!room) {
       throw ERROR.NO_ROOM;
     }
     const user: User = res.locals.user;
+
     if (!user) {
       throw ERROR.INVALID_TOKEN;
     }
+
     const inRoom =
-      findIndex(room.participants, participant => {
-        return participant._id.equals(user._id);
+      findIndex(room.admins, admin => {
+        return admin._id.equals(user._id);
       }) !== -1;
+
     if (!inRoom) {
       throw ERROR.NO_PERMISSION;
     }

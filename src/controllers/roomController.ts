@@ -170,9 +170,11 @@ router.put(
       const user: User = res.locals.user;
       const room: Room = res.locals.room;
       const { title, lecturer, password } = req.body;
+
       if (!ownRoom(room, user)) {
         throw ERROR.NO_PERMISSION;
       }
+
       const updatedRoom = await room
         .update(
           {
@@ -188,8 +190,8 @@ router.put(
       if (!updatedRoom) {
         throw ERROR.FAILED_TO_REGISTER_AS_ADMIN;
       }
-      await updatedRoom.save();
-      return res.send(updatedRoom);
+      await room.save();
+      return res.send(room);
     } catch (err) {
       return res.status(404).send(err);
     }
